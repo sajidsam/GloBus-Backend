@@ -1,0 +1,37 @@
+require("dotenv").config(); 
+const express = require("express");
+const cors = require("cors");
+const { MongoClient, ServerApiVersion } = require("mongodb");
+const { signupUser, signinUser } = require("./Controllers/userController");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+
+const uri = process.env.MONGODB_URI;
+const port = process.env.PORT || 5000;
+
+const client = new MongoClient(uri, {
+  serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
+});
+
+app.locals.mongoClient = client;
+
+async function run() {
+  try {
+    await client.connect();
+    console.log("Connected to MongoDB Atlas");
+
+    // Routes
+    app.post("/signup", signupUser);
+    app.post("/signin", signinUser);
+
+    
+    app.listen(port, () => console.log(`Server running on port ${port}`));
+  } catch (error) {
+    console.log("MongoDB connection failed:", error.message);
+  }
+}
+
+run().catch(console.dir);
