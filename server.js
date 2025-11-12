@@ -26,6 +26,9 @@ async function run() {
     console.log("Connected to MongoDB Atlas");
 
     // Routes
+    app.get('/',(req,res)=>{
+      res.send('working')
+    })
     app.post("/signup", signupUser);
     app.post("/signin", signinUser);
     app.get("/browseProduct",browseProduct);
