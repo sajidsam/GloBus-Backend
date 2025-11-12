@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const { signupUser, signinUser } = require("./Controllers/userController");
+const { browseProduct } = require("./Controllers/productController");
+
 
 const app = express();
 app.use(cors());
@@ -26,9 +28,10 @@ async function run() {
     // Routes
     app.post("/signup", signupUser);
     app.post("/signin", signinUser);
+    app.get("/browseProduct",browseProduct);
 
     
-    app.listen(port, () => console.log(`Server running on port ${port}`));
+    app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
   } catch (error) {
     console.log("MongoDB connection failed:", error.message);
   }
