@@ -1,6 +1,5 @@
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const { signupUser, signinUser } = require("./Controllers/userController");
 const {
@@ -10,13 +9,16 @@ const {
   deleteUser,
   toggleUserStatus
 } = require("./Controllers/AdminController");
+
 const {
   browseProduct,
   createProduct,
   updateProduct,
   deleteProduct
 } = require("./Controllers/productController");
-const {  getProductById } = require("./Controllers/searchController");
+
+const { getProductById } = require("./Controllers/searchController");
+
 const {
   addToCart,
   getCart,
@@ -25,8 +27,18 @@ const {
   clearCart
 } = require("./Controllers/cartController");
 
+
+const { initSSLCommerz,
+  handleIPN,
+  paymentSuccess,
+  paymentFailed,
+  paymentCancel,
+  getUserOrders
+} = require("./Controllers/PaymentController");
+
 const app = express();
-app.use(cors());
+const cors = require("cors");
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 
 const uri = process.env.MONGODB_URI;
@@ -46,12 +58,12 @@ async function run() {
     // Create admin
     await createAdmin(client.db("globusDB"));
 
+    // Role Route
+    app.get("/getRole", getRole);
+
     // Auth Route
     app.post("/signup", signupUser);
     app.post("/signin", signinUser);
-
-    // Role Route
-    app.get("/getRole", getRole);
 
     // Admin User Management Route
     app.get("/admin/users", showUsers);
@@ -67,12 +79,23 @@ async function run() {
     app.get("/browseProduct", browseProduct);
     app.get("/productDetail/:id", getProductById);
 
+    //Order & Payment History Routes
+    app.get("/api/orders", getUserOrders);
+
     // Cart Route
     app.post("/cart/add", addToCart);
     app.get("/cart/:userId", getCart);
     app.put("/cart/update/:cartItemId", updateCartQuantity);
     app.delete("/cart/remove/:cartItemId", removeFromCart);
     app.delete("/cart/clear/:userId", clearCart);
+
+    // SSL Commerz Payment Routes
+    app.post("/api/sslcommerz/init", initSSLCommerz);
+    app.post("/api/sslcommerz/ipn", handleIPN);
+    app.post("/api/sslcommerz/success/:tran_id", paymentSuccess);
+    app.post("/api/sslcommerz/fail/:tran_id", paymentFailed);
+    app.post("/api/sslcommerz/cancel/:tran_id", paymentCancel);
+    app.get("/api/orders", getUserOrders);
 
     app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
   } catch (error) {

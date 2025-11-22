@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 
+// Sign Up
 const signupUser = async (req, res) => {
   try {
     const client = req.app.locals.mongoClient;
@@ -35,6 +36,7 @@ const signupUser = async (req, res) => {
   }
 };
 
+// SignIn 
 const signinUser = async (req, res) => {
   try {
     const client = req.app.locals.mongoClient;
